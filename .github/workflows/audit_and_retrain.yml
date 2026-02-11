@@ -1,0 +1,39 @@
+name: Weekly Audit and Self-Retrain
+on:
+  schedule:
+    - cron: '0 11 * * 3'
+
+jobs:
+  audit-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: pip install yfinance pandas
+
+      - name: Run Audit
+        id: run_audit
+        continue-on-error: true
+        run: python scripts/audit.py
+
+      - name: Retrain Model if Audit Failed
+        if: steps.run_audit.outcome == 'failure'
+        run: |
+          echo "Audit failed! Starting retraining..."
+          python scripts/train.py
+          
+      - name: Commit Updated Model
+        if: steps.run_audit.outcome == 'failure'
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add models/nifty_model.pkl data/training_data.csv
+          git commit -m "Auto-Retrain: Model updated due to Tuesday performance gap"
+          git push
