@@ -2,7 +2,7 @@ name: Daily Nifty Prediction
 
 on:
   schedule:
-    - cron: '30 2 * * *' # Runs at 8:00 AM IST daily
+    - cron: '30 2 * * *' # 8:00 AM IST
   workflow_dispatch: # This enables the manual 'Run workflow' button
 
 jobs:
@@ -20,15 +20,18 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run Prediction
+      - name: Fetch Market Data and Sentiment
         env:
           NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
-        run: python model.py
+        run: python fetch_data.py  # This creates market_data.csv
 
-      - name: Commit Results
+      - name: Run Prediction Model
+        run: python model.py       # This reads market_data.csv
+
+      - name: Commit and Push Results
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add market_data.csv predictions_log.txt nifty_model.pkl
-          git commit -m "Update daily prediction and model" || echo "No changes to commit"
+          git commit -m "Update daily prediction and dataset" || echo "No changes to commit"
           git push
