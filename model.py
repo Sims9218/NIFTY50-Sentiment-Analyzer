@@ -35,16 +35,22 @@ def train_model(train_data):
     print("Model Retrained Successfully.")
     return model
 
+# Inside model.py
 def main():
-    # Load your historical data (Updated daily by your fetcher)
     if not os.path.exists(DATA_PATH):
-        print("No data found. Please run fetch_data.py first.")
+        print("No data found.")
         return
 
     df = pd.read_csv(DATA_PATH)
+    
+    # Check if we have enough data for the moving average and training
+    if len(df) < 6:
+        print(f"Not enough data to train yet (need at least 6 days, currently have {len(df)}).")
+        print("Collecting today's data and waiting for more history...")
+        return 
+
     df = prepare_features(df)
 
-    # 2. Check for Retraining Necessity (The "Smart" Loop)
     if os.path.exists(MODEL_PATH):
         model = joblib.load(MODEL_PATH)
         
