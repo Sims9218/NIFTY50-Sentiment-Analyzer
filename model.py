@@ -6,11 +6,10 @@ from sklearn.metrics import accuracy_score
 import joblib
 import os
 
-# 1. Configuration & Constants
 MODEL_PATH = "nifty_model.pkl"
 DATA_PATH = "market_data.csv"
-RETRAIN_THRESHOLD_ACCURACY = 0.55  # Retrain if accuracy drops below 55%
-WINDOW_SIZE = 60  # Look at the last 60 trading days for retraining
+RETRAIN_THRESHOLD_ACCURACY = 0.55
+WINDOW_SIZE = 60
 
 def prepare_features(df):
     """
@@ -18,7 +17,7 @@ def prepare_features(df):
     """
     df['Price_Change'] = df['Close'].pct_change()
     df['MA_5'] = df['Close'].rolling(window=5).mean()
-    df['Target'] = (df['Close'].shift(-1) > df['Close']).astype(int) # 1 if tomorrow is UP
+    df['Target'] = (df['Close'].shift(-1) > df['Close']).astype(int)
     return df.dropna()
 
 def train_model(train_data):
@@ -35,7 +34,6 @@ def train_model(train_data):
     print("Model Retrained Successfully.")
     return model
 
-# Inside model.py
 def main():
     if not os.path.exists(DATA_PATH):
         print("No data found.")
@@ -43,7 +41,6 @@ def main():
 
     df = pd.read_csv(DATA_PATH)
     
-    # Check if we have enough data for the moving average and training
     if len(df) < 6:
         print(f"Not enough data to train yet (need at least 6 days, currently have {len(df)}).")
         print("Collecting today's data and waiting for more history...")
@@ -54,7 +51,6 @@ def main():
     if os.path.exists(MODEL_PATH):
         model = joblib.load(MODEL_PATH)
         
-        # Test accuracy on the last 10 days
         test_df = df.tail(10)
         X_test = test_df[['Sentiment_Score', 'Price_Change', 'MA_5']]
         y_test = test_df['Target']
@@ -64,17 +60,14 @@ def main():
         
         print(f"Current Rolling Accuracy: {current_acc:.2f}")
 
-        # If model is underperforming, retrain on the 'Sliding Window'
         if current_acc < RETRAIN_THRESHOLD_ACCURACY:
             print("Accuracy below threshold. Triggering sliding window retraining...")
-            train_data = df.tail(WINDOW_SIZE) # Only use recent 'mood' of the market
+            train_data = df.tail(WINDOW_SIZE)
             model = train_model(train_data)
     else:
         print("No model found. Initializing first training...")
         model = train_model(df)
 
-    # 3. Make Tomorrow's Prediction
-    # Grab the very last row (today's data) to predict tomorrow
     latest_features = df.tail(1)[['Sentiment_Score', 'Price_Change', 'MA_5']]
     prediction = model.predict(latest_features)[0]
     confidence = model.predict_proba(latest_features)[0]
@@ -82,7 +75,6 @@ def main():
     result = "UP" if prediction == 1 else "DOWN"
     print(f"PREDICTION FOR NEXT TRADING DAY: {result} ({max(confidence)*100:.2f}% confidence)")
 
-    # Save prediction to a log file for GitHub to commit
     with open("predictions_log.txt", "a") as f:
         f.write(f"Date: {df.iloc[-1]['Date']} | Prediction: {result} | Confidence: {max(confidence):.2f}\n")
 
