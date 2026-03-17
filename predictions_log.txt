@@ -11,3 +11,4 @@ Date: 2026-03-13 | Prediction: DOWN | Confidence: 0.50
 Date: 2026-03-13 | Prediction: DOWN | Confidence: 0.56
 Date: 2026-03-13 | Prediction: DOWN | Confidence: 0.54
 Date: 2026-03-16 | Prediction: UP | Confidence: 0.59
+Date: 2026-03-17 | Prediction: UP | Confidence: 0.89
