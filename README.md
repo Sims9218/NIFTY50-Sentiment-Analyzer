@@ -1,8 +1,6 @@
 # Nifty50 Sentiment-Based Prediction Engine
 
-An automated NLP and Machine Learning pipeline that predicts the next-day movement of the **Nifty 50 (NSE)** by analyzing financial news sentiment and historical price action. 
-
-This project was developed for the **Natural Language Processing (NLP)** course to demonstrate the impact of textual sentiment on financial markets.
+An automated Machine Learning pipeline that predicts the next-day movement of the **Nifty 50 (NSE)** by analyzing financial news sentiment and historical price action. 
 
 ---
 
