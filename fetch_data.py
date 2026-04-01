@@ -33,7 +33,7 @@ def fetch_news():
     """
     Fetches latest Indian stock market news headlines.
     """
-    url = f'https://newsapi.org/v2/everything?q=Nifty50+OR+"Indian+Stock+Market"&language=en&sortBy=publishedAt&apiKey={NEWS_API_KEY}'
+    url = f'https://newsapi.org/v2/everything?q=(Nifty50 OR NSE OR "Indian Stock Market" OR "Bank Nifty")&language=en&sortBy=publishedAt&apiKey={NEWS_API_KEY}'
     response = requests.get(url).json()
     articles = response.get('articles', [])
     return [a['title'] for a in articles[:15]]
