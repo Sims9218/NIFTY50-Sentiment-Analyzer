@@ -1,47 +1,52 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import os
 
-st.set_page_config(page_title="Nifty50 Sentiment Dashboard", layout="wide")
+st.set_page_config(page_title="Nifty50 Predictor", layout="wide")
 
-st.title("📈 Nifty50 Sentiment & Prediction Dashboard")
-st.markdown("This dashboard visualizes market sentiment and AI-driven predictions.")
+def get_latest_prediction():
+    if os.path.exists("predictions_log.txt"):
+        with open("predictions_log.txt", "r") as f:
+            lines = f.readlines()
+            if lines:
+                return lines[-1].strip()
+    return "No prediction data available yet."
 
-@st.cache_data
-def load_data():
-    df = pd.read_csv("market_data.csv")
-    df['Date'] = pd.to_datetime(df['Date'])
-    return df
+st.title("Nifty 50 AI Prediction Dashboard")
+
+st.subheader("Today's Market Forecast")
+prediction_text = get_latest_prediction()
+
+if "UP" in prediction_text:
+    st.success(f"### Forecast: {prediction_text}")
+elif "DOWN" in prediction_text:
+    st.error(f"### Forecast: {prediction_text}")
+else:
+    st.info(f"### Status: {prediction_text}")
+
+st.divider()
 
 try:
-    df = load_data()
-
-    latest_row = df.iloc[-1]
-    prev_row = df.iloc[-2] if len(df) > 1 else latest_row
-
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Latest Nifty Close", f"₹{latest_row['Close']:.2f}", 
-                f"{latest_row['Close'] - prev_row['Close']:.2f}")
+    df = pd.read_csv("market_data.csv")
+    df['Date'] = pd.to_datetime(df['Date'])
     
-    sentiment_val = latest_row['Sentiment_Score']
-    sentiment_label = "Bullish" if sentiment_val > 0.05 else "Bearish" if sentiment_val < -0.05 else "Neutral"
-    col2.metric("Market Sentiment", sentiment_label, f"{sentiment_val:.2f}")
+    col1, col2 = st.columns(2)
     
-    col3.metric("System Status", "Live", "Auto-Retraining On")
+    with col1:
+        st.metric("Latest Sentiment Score", f"{df.iloc[-1]['Sentiment_Score']:.2f}")
+        fig_price = px.line(df, x='Date', y='Close', title="Nifty 50 Price Action")
+        st.plotly_chart(fig_price, use_container_width=True)
 
-    st.subheader("Market Trends vs. Sentiment")
-    
-    fig_price = px.line(df, x='Date', y='Close', title="Nifty 50 Closing Price")
-    st.plotly_chart(fig_price, use_container_width=True)
-
-    fig_sent = px.bar(df, x='Date', y='Sentiment_Score', 
-                      title="Daily Sentiment Index (FinBERT)",
-                      color='Sentiment_Score', 
-                      color_continuous_scale='RdYlGn')
-    st.plotly_chart(fig_sent, use_container_width=True)
-
-    if st.checkbox("Show Raw Data"):
-        st.write(df.tail(10))
+    with col2:
+        st.metric("Latest Close", f"₹{df.iloc[-1]['Close']:.2f}")
+        fig_sent = px.bar(df, x='Date', y='Sentiment_Score', title="News Sentiment Trend")
+        st.plotly_chart(fig_sent, use_container_width=True)
 
 except Exception as e:
-    st.error(f"Waiting for data... Ensure market_data.csv exists. Error: {e}")
+    st.warning("Please run the GitHub Action at least once to generate market_data.csv")
+
+with st.expander("View Prediction History"):
+    if os.path.exists("predictions_log.txt"):
+        with open("predictions_log.txt", "r") as f:
+            st.text(f.read())
