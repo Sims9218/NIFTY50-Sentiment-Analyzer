@@ -3,50 +3,35 @@ import pandas as pd
 import plotly.express as px
 import os
 
-st.set_page_config(page_title="Nifty50 Predictor", layout="wide")
+st.set_page_config(page_title="Nifty50 HMM Predictor", layout="wide")
 
-def get_latest_prediction():
+def get_latest_pred():
     if os.path.exists("predictions_log.txt"):
         with open("predictions_log.txt", "r") as f:
-            lines = f.readlines()
-            if lines:
-                return lines[-1].strip()
-    return "No prediction data available yet."
+            return f.readlines()[-1].strip()
+    return "Awaiting Model Run..."
 
-st.title("Nifty 50 AI Prediction Dashboard")
+st.title("📊 Nifty 50 Hidden Markov Model Dashboard")
 
-st.subheader("Today's Market Forecast")
-prediction_text = get_latest_prediction()
-
-if "UP" in prediction_text:
-    st.success(f"### Forecast: {prediction_text}")
-elif "DOWN" in prediction_text:
-    st.error(f"### Forecast: {prediction_text}")
+pred = get_latest_pred()
+if "UP" in pred:
+    st.success(f"### Next Day Forecast: {pred}")
 else:
-    st.info(f"### Status: {prediction_text}")
-
-st.divider()
+    st.error(f"### Next Day Forecast: {pred}")
 
 try:
     df = pd.read_csv("market_data.csv")
-    df['Date'] = pd.to_datetime(df['Date'])
+    
+    st.subheader("Market Regimes (HMM States)")
+    fig = px.scatter(df, x='Date', y='Close', color='Sentiment_Score',
+                     size=df['Price_Change'].abs(), title="Closing Price vs Sentiment Intensity")
+    st.plotly_chart(fig, use_container_width=True)
     
     col1, col2 = st.columns(2)
-    
     with col1:
-        st.metric("Latest Sentiment Score", f"{df.iloc[-1]['Sentiment_Score']:.2f}")
-        fig_price = px.line(df, x='Date', y='Close', title="Nifty 50 Price Action")
-        st.plotly_chart(fig_price, use_container_width=True)
-
+        st.plotly_chart(px.line(df, x='Date', y='Close', title="Price Trend"))
     with col2:
-        st.metric("Latest Close", f"₹{df.iloc[-1]['Close']:.2f}")
-        fig_sent = px.bar(df, x='Date', y='Sentiment_Score', title="News Sentiment Trend")
-        st.plotly_chart(fig_sent, use_container_width=True)
+        st.plotly_chart(px.bar(df, x='Date', y='Sentiment_Score', title="FinBERT Sentiment History"))
 
 except Exception as e:
-    st.warning("Please run the GitHub Action at least once to generate market_data.csv")
-
-with st.expander("View Prediction History"):
-    if os.path.exists("predictions_log.txt"):
-        with open("predictions_log.txt", "r") as f:
-            st.text(f.read())
+    st.info("Upload market_data.csv to begin visualization.")
