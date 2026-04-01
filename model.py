@@ -1,82 +1,43 @@
 import pandas as pd
 import numpy as np
-import yfinance as yf
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+from hmmlearn.hmm import GaussianHMM
 import joblib
 import os
 
-MODEL_PATH = "nifty_model.pkl"
 DATA_PATH = "market_data.csv"
-RETRAIN_THRESHOLD_ACCURACY = 0.55
-WINDOW_SIZE = 60
+MODEL_PATH = "nifty_hmm.pkl"
 
-def prepare_features(df):
-    """
-    Creates technical indicators to pair with your NLP sentiment.
-    """
-    df['Price_Change'] = df['Close'].pct_change()
-    df['MA_5'] = df['Close'].rolling(window=5).mean()
-    df['Target'] = (df['Close'].shift(-1) > df['Close']).astype(int)
-    return df.dropna()
-
-def train_model(train_data):
-    """
-    Trains the Random Forest. We use Random Forest because it 
-    handles the 'noise' of NLP sentiment better than deep learning.
-    """
-    X = train_data[['Sentiment_Score', 'Price_Change', 'MA_5']]
-    y = train_data['Target']
+def train_hmm(df):
+    X = df[['Sentiment_Score', 'Price_Change']].values
     
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X, y)
-    joblib.dump(model, MODEL_PATH)
-    print("Model Retrained Successfully.")
-    return model
+    model = GaussianHMM(n_components=2, covariance_type="diag", n_iter=1000)
+    model.fit(X)
+    
+    bullish_state = 0 if model.means_[0][1] > model.means_[1][1] else 1
+    
+    joblib.dump((model, bullish_state), MODEL_PATH)
+    return model, bullish_state
 
 def main():
-    if not os.path.exists(DATA_PATH):
-        print("No data found.")
+    if not os.path.exists(DATA_PATH): return
+    df = pd.read_csv(DATA_PATH).dropna()
+    
+    if len(df) < 10:
+        print("Waiting for more historical data...")
         return
 
-    df = pd.read_csv(DATA_PATH)
+    model, bullish_state = train_hmm(df)
     
-    if len(df) < 6:
-        print(f"Not enough data to train yet (need at least 6 days, currently have {len(df)}).")
-        print("Collecting today's data and waiting for more history...")
-        return 
-
-    df = prepare_features(df)
-
-    if os.path.exists(MODEL_PATH):
-        model = joblib.load(MODEL_PATH)
-        
-        test_df = df.tail(10)
-        X_test = test_df[['Sentiment_Score', 'Price_Change', 'MA_5']]
-        y_test = test_df['Target']
-        
-        predictions = model.predict(X_test)
-        current_acc = accuracy_score(y_test, predictions)
-        
-        print(f"Current Rolling Accuracy: {current_acc:.2f}")
-
-        if current_acc < RETRAIN_THRESHOLD_ACCURACY:
-            print("Accuracy below threshold. Triggering sliding window retraining...")
-            train_data = df.tail(WINDOW_SIZE)
-            model = train_model(train_data)
-    else:
-        print("No model found. Initializing first training...")
-        model = train_model(df)
-
-    latest_features = df.tail(1)[['Sentiment_Score', 'Price_Change', 'MA_5']]
-    prediction = model.predict(latest_features)[0]
-    confidence = model.predict_proba(latest_features)[0]
-
-    result = "UP" if prediction == 1 else "DOWN"
-    print(f"PREDICTION FOR NEXT TRADING DAY: {result} ({max(confidence)*100:.2f}% confidence)")
-
+    latest_obs = df[['Sentiment_Score', 'Price_Change']].tail(1).values
+    current_state = model.predict(latest_obs)[0]
+    
+    prob_next_bullish = model.transmat_[current_state][bullish_state]
+    
+    prediction = "UP" if prob_next_bullish > 0.5 else "DOWN"
+    conf = prob_next_bullish if prediction == "UP" else (1 - prob_next_bullish)
+    
     with open("predictions_log.txt", "a") as f:
-        f.write(f"Date: {df.iloc[-1]['Date']} | Prediction: {result} | Confidence: {max(confidence):.2f}\n")
+        f.write(f"Date: {df.iloc[-1]['Date']} | Prediction: {prediction} | Confidence: {conf:.2f}\n")
 
 if __name__ == "__main__":
     main()
