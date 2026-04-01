@@ -7,3 +7,4 @@ requests
 joblib
 streamlit
 plotly
+hmmlearn
