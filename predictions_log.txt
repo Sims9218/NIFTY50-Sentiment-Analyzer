@@ -33,3 +33,4 @@ Date: 2026-04-01 | Prediction: UP | Confidence: 1.00
 Date: 2026-04-02 | Prediction: UP | Confidence: 1.00
 Date: 2026-04-02 | Prediction: DOWN | Confidence: 0.58
 Date: 2026-04-02 | Prediction: UP | Confidence: 1.00
+Date: 2026-04-02 | Prediction: DOWN | Confidence: 0.59
