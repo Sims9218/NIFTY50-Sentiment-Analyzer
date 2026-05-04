@@ -62,3 +62,4 @@ Date: 2026-04-30 | Prediction: DOWN | Confidence: 0.91
 Date: 2026-04-30 | Prediction: DOWN | Confidence: 1.00
 Date: 2026-04-30 | Prediction: DOWN | Confidence: 1.00
 Date: 2026-04-30 | Prediction: UP | Confidence: 0.99
+Date: 2026-05-04 | Prediction: DOWN | Confidence: 0.88
