@@ -71,3 +71,4 @@ Date: 2026-05-08 | Prediction: DOWN | Confidence: 0.86
 Date: 2026-05-08 | Prediction: DOWN | Confidence: 0.86
 Date: 2026-05-11 | Prediction: UP | Confidence: 0.86
 Date: 2026-05-12 | Prediction: UP | Confidence: 0.99
+Date: 2026-05-13 | Prediction: UP | Confidence: 0.86
