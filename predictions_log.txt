@@ -95,3 +95,4 @@ Date: 2026-06-02 | Prediction: UP | Confidence: 0.85
 Date: 2026-06-03 | Prediction: DOWN | Confidence: 0.95
 Date: 2026-06-04 | Prediction: DOWN | Confidence: 0.96
 Date: 2026-06-05 | Prediction: DOWN | Confidence: 0.94
+Date: 2026-06-05 | Prediction: DOWN | Confidence: 0.95
