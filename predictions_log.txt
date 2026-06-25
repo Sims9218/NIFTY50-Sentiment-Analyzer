@@ -113,3 +113,4 @@ Date: 2026-06-19 | Prediction: DOWN | Confidence: 0.97
 Date: 2026-06-22 | Prediction: DOWN | Confidence: 0.97
 Date: 2026-06-23 | Prediction: UP | Confidence: 0.85
 Date: 2026-06-24 | Prediction: DOWN | Confidence: 1.00
+Date: 2026-06-25 | Prediction: UP | Confidence: 0.85
