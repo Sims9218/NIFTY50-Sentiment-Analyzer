@@ -149,3 +149,4 @@ Date: 2026-07-27 | Prediction: UP | Confidence: 0.88
 Date: 2026-07-28 | Prediction: UP | Confidence: 0.88
 Date: 2026-07-29 | Prediction: DOWN | Confidence: 0.98
 Date: 2026-07-30 | Prediction: DOWN | Confidence: 0.98
+Date: 2026-07-31 | Prediction: DOWN | Confidence: 0.98
