@@ -206,3 +206,4 @@ Date: 2026-09-24 | Prediction: UP | Confidence: 0.87
 Date: 2026-09-25 | Prediction: UP | Confidence: 0.87
 Date: 2026-09-25 | Prediction: DOWN | Confidence: 0.97
 Date: 2026-09-25 | Prediction: DOWN | Confidence: 1.00
+Date: 2026-09-28 | Prediction: DOWN | Confidence: 1.00
