@@ -220,3 +220,4 @@ Date: 2026-10-08 | Prediction: DOWN | Confidence: 0.98
 Date: 2026-10-09 | Prediction: DOWN | Confidence: 0.94
 Date: 2026-10-09 | Prediction: DOWN | Confidence: 0.98
 Date: 2026-10-09 | Prediction: UP | Confidence: 0.86
+Date: 2026-10-12 | Prediction: DOWN | Confidence: 0.80
